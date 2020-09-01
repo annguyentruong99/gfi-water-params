@@ -31,9 +31,17 @@ const useStyles = makeStyles((theme) =>
 		nextButton: {
 			backgroundColor: "#007c89",
 			color: "white",
+			"&:hover": {
+				backgroundColor: "white",
+				color: "#007c89",
+				boxShadow: "2px 3px",
+			},
 		},
 		backButton: {
 			marginRight: theme.spacing(1),
+			"&:hover": {
+				boxShadow: "2px 3px",
+			},
 		},
 		resetButton: {
 			justifyItems: "center",
@@ -94,12 +102,12 @@ const WaterParam: FC = () => {
 							<div className={classes.buttonContainer}>
 								<div>
 									<Button
-										variant="contained"
+										variant="outlined"
 										size="small"
 										style={
 											activeStep === 0
 												? { display: "none" }
-												: { backgroundColor: "#df3106", color: "white" }
+												: { borderColor: "#df3106", color: "#df3106" }
 										}
 										onClick={prevStep}
 										className={classes.backButton}
@@ -120,14 +128,6 @@ const WaterParam: FC = () => {
 					</Step>
 				))}
 			</Stepper>
-			<Button
-				variant="contained"
-				size="small"
-				onClick={resetStepper}
-				className={classes.resetButton}
-			>
-				Reset
-			</Button>
 		</div>
 	);
 };
