@@ -1,4 +1,4 @@
-import React, { FC, useContext, useState } from "react";
+import React, { FC, useState } from "react";
 
 import {
 	Typography,
@@ -34,6 +34,11 @@ const useStyles = makeStyles((theme) =>
 		},
 		backButton: {
 			marginRight: theme.spacing(1),
+		},
+		resetButton: {
+			justifyItems: "center",
+			backgroundColor: "#df3016",
+			color: "white",
 		},
 	})
 );
@@ -115,6 +120,14 @@ const WaterParam: FC = () => {
 					</Step>
 				))}
 			</Stepper>
+			<Button
+				variant="contained"
+				size="small"
+				onClick={resetStepper}
+				className={classes.resetButton}
+			>
+				Reset
+			</Button>
 		</div>
 	);
 };
