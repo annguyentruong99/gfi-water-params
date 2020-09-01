@@ -10,14 +10,15 @@
     "test": "direflow-scripts test"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
     "@types/node": "12.7.8",
     "@types/react": "16.9.3",
     "@types/react-dom": "16.9.1",
+    "direflow-component": "3.5.0",
+    "direflow-scripts": "3.5.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-scripts": "3.4.1",
-    "direflow-component": "3.5.0",
-    "direflow-scripts": "3.5.0"
+    "react-scripts": "3.4.1"
   },
   "devDependencies": {
     "@types/jest": "24.0.18",
