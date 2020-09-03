@@ -10,11 +10,14 @@ import {
 	StepContent,
 	Avatar,
 } from "@material-ui/core";
-import { makeStyles, createStyles } from "@material-ui/core/styles";
+import {
+	makeStyles,
+	createStyles,
+	createMuiTheme,
+	ThemeProvider,
+} from "@material-ui/core/styles";
 
 import logo from "../../img/logo.png";
-
-import { Water } from "../models/waterparams.model";
 
 const useStyles = makeStyles((theme) =>
 	createStyles({
@@ -26,6 +29,10 @@ const useStyles = makeStyles((theme) =>
 			width: theme.spacing(10),
 			marginLeft: "auto",
 			marginRight: "auto",
+			marginBottom: theme.spacing(3),
+		},
+		inputForm: {
+			marginTop: theme.spacing(3),
 		},
 		buttonContainer: {
 			marginTop: theme.spacing(3),
@@ -53,7 +60,26 @@ const useStyles = makeStyles((theme) =>
 	})
 );
 
-const waterParams: Water = {
+const theme = createMuiTheme({
+	palette: {
+		primary: {
+			main: "#007c89",
+		},
+		secondary: {
+			main: "#df3016",
+		},
+	},
+});
+
+interface WaterParams {
+	temp: number;
+	pH: number;
+	ammonia: number;
+	nitrite: number;
+	nitrate: number;
+}
+
+const waterParams: WaterParams = {
 	temp: 0,
 	pH: 0,
 	ammonia: 0,
@@ -61,19 +87,27 @@ const waterParams: Water = {
 	nitrate: 0,
 };
 
-function getSteps() {
-	return ["PH Level", "Ammonia Level", "Nitrite Level", "Nitrate Level"];
+function getSteps(): [string, string][] {
+	return [
+		["Water Temperature", "Temperature"],
+		["PH Level", "pH"],
+		["Ammonia Level", "Ammonia"],
+		["Nitrite Level", "Nitrite"],
+		["Nitrate Level", "Nitrate"],
+	];
 }
 
 function getStepContent(step: number) {
 	switch (step) {
 		case 0:
-			return `Enter Your pH Reading In The Input Box Below`;
+			return `Enter Your Water Temperature In The Input Box Below`;
 		case 1:
-			return `Enter Your Ammonia Reading In The Input Box Below`;
+			return `Enter Your pH Reading In The Input Box Below`;
 		case 2:
-			return `Enter Your Nitrite Reading In The Input Box Below`;
+			return `Enter Your Ammonia Reading In The Input Box Below`;
 		case 3:
+			return `Enter Your Nitrite Reading In The Input Box Below`;
+		case 4:
 			return `Enter Your Nitrate Reading In The Input Box Below`;
 		default:
 			return "Unknown Step!";
@@ -82,7 +116,8 @@ function getStepContent(step: number) {
 
 const WaterParam: FC = () => {
 	const classes = useStyles();
-	const [activeStep, setActiveStep] = useState(0);
+	const [activeStep, setActiveStep] = useState<number>(0);
+	const [complete, setComplete] = useState<boolean>(false);
 	const steps = getSteps();
 
 	// Proceed to nexr step
@@ -98,50 +133,92 @@ const WaterParam: FC = () => {
 	// Reset the stepper
 	const resetStepper = () => {
 		setActiveStep(0);
+		setComplete(false);
 	};
+
+	// Finish entering the input
+	const completed = () => {
+		setComplete(true);
+	};
+
+	// Handle the input when customers enter them
+	const handleChange = (event: any) => {};
 
 	return (
 		<div className={classes.root}>
-			<Avatar src={logo} variant="circle" className={classes.avatar} />
-			<Stepper activeStep={activeStep} orientation="vertical">
-				{steps.map((label, index) => (
-					<Step key={label}>
-						<StepLabel>{label}</StepLabel>
-						<StepContent>
-							<Typography>{getStepContent(index)}</Typography>
-							<form noValidate autoComplete="off">
-								<TextField id="standard-basic" />
-							</form>
-						</StepContent>
-					</Step>
-				))}
-			</Stepper>
-			<div className={classes.buttonContainer}>
-				<div>
-					<Button
-						variant="contained"
-						size="small"
-						onClick={nextStep}
-						className={classes.nextButton}
-					>
-						{activeStep === steps.length - 1 ? "Finish" : "Next"}
-					</Button>
+			<ThemeProvider theme={theme}>
+				<Avatar src={logo} variant="circle" className={classes.avatar} />
+				{complete === false ? (
+					<Stepper activeStep={activeStep} orientation="vertical">
+						{steps.map((label, index) => (
+							<Step key={label[0]}>
+								<StepLabel>{label[0]}</StepLabel>
+								<StepContent>
+									<Typography>{getStepContent(index)}</Typography>
+									<form
+										noValidate
+										autoComplete="off"
+										className={classes.inputForm}
+									>
+										<TextField
+											id="standard-basic"
+											label={label[1]}
+											style={{ color: "#007c89" }}
+										/>
+									</form>
+								</StepContent>
+							</Step>
+						))}
+					</Stepper>
+				) : (
+					<div>
+						<Typography variant="h5">
+							Below are your water parameter inputs: <br />
+						</Typography>
+					</div>
+				)}
 
-					<Button
-						variant="outlined"
-						size="small"
-						style={
-							activeStep === 0
-								? { display: "none" }
-								: { borderColor: "#df3106", color: "#df3106" }
-						}
-						onClick={activeStep === steps.length - 1 ? resetStepper : prevStep}
-						className={classes.backButton}
-					>
-						{activeStep === steps.length - 1 ? "Reset" : "Back"}
-					</Button>
+				{/* Buttons logics to manipulate the form */}
+				<div className={classes.buttonContainer}>
+					<div>
+						{activeStep === steps.length - 1 ? (
+							<Button
+								variant="contained"
+								size="small"
+								onClick={completed}
+								className={classes.nextButton}
+							>
+								Finish
+							</Button>
+						) : (
+							<Button
+								variant="contained"
+								size="small"
+								onClick={nextStep}
+								className={classes.nextButton}
+							>
+								Next
+							</Button>
+						)}
+
+						<Button
+							variant="outlined"
+							size="small"
+							style={
+								activeStep === 0
+									? { display: "none" }
+									: { borderColor: "#df3106", color: "#df3106" }
+							}
+							onClick={
+								activeStep === steps.length - 1 ? resetStepper : prevStep
+							}
+							className={classes.backButton}
+						>
+							{activeStep === steps.length - 1 ? "Reset" : "Back"}
+						</Button>
+					</div>
 				</div>
-			</div>
+			</ThemeProvider>
 		</div>
 	);
 };
