@@ -10,6 +10,7 @@ import {
 	Avatar,
 	Slider,
 } from "@material-ui/core";
+
 import {
 	makeStyles,
 	createStyles,
@@ -17,59 +18,9 @@ import {
 	ThemeProvider,
 } from "@material-ui/core/styles";
 
+import { useForm, Controller } from "react-hook-form";
+
 import logo from "../../img/logo.png";
-
-const useStyles = makeStyles((theme) =>
-	createStyles({
-		root: {
-			width: "100%",
-		},
-		avatar: {
-			height: theme.spacing(10),
-			width: theme.spacing(10),
-			marginLeft: "auto",
-			marginRight: "auto",
-			marginBottom: theme.spacing(3),
-		},
-		inputForm: {
-			marginTop: theme.spacing(3),
-		},
-		buttonContainer: {
-			marginTop: theme.spacing(3),
-		},
-		nextButton: {
-			backgroundColor: "#007c89",
-			color: "white",
-			marginRight: theme.spacing(1),
-			"&:hover": {
-				backgroundColor: "white",
-				color: "#007c89",
-				boxShadow: "2px 3px",
-			},
-		},
-		backButton: {
-			"&:hover": {
-				boxShadow: "2px 3px",
-			},
-		},
-		resetButton: {
-			justifyItems: "center",
-			backgroundColor: "#df3016",
-			color: "white",
-		},
-	})
-);
-
-const theme = createMuiTheme({
-	palette: {
-		primary: {
-			main: "#007c89",
-		},
-		secondary: {
-			main: "#df3016",
-		},
-	},
-});
 
 const marks = [
 	[
@@ -127,13 +78,17 @@ interface Water {
 	nitrate: number;
 }
 
+type FormValues = {
+	slider: string;
+};
+
 function getSteps(): string[] {
 	return [
-		"Water Temperature",
+		"Water Temperature (F)",
 		"PH Level",
-		"Ammonia Level",
-		"Nitrite Level",
-		"Nitrate Level",
+		"Ammonia Level (ppm)",
+		"Nitrite Level (ppm)",
+		"Nitrate Level (ppm)",
 	];
 }
 
@@ -141,13 +96,7 @@ const WaterParam: FC = () => {
 	const classes = useStyles();
 	const [activeStep, setActiveStep] = useState<number>(0);
 	const [complete, setComplete] = useState<boolean>(false);
-	const [params, setParams] = useState({
-		temp: 0,
-		pH: 0,
-		ammonia: 0,
-		nitrite: 0,
-		nitrate: 0,
-	});
+	const { handleSubmit, control } = useForm<FormValues>();
 	const steps = getSteps();
 
 	// Proceed to nexr step
@@ -172,7 +121,7 @@ const WaterParam: FC = () => {
 	};
 
 	// Handle the input when customers enter them
-	const handleChange = (event: object): void => {
+	const handleChange = (event: object) => {
 		console.log(event);
 	};
 
@@ -186,15 +135,85 @@ const WaterParam: FC = () => {
 							<Step key={label}>
 								<StepLabel>{label}</StepLabel>
 								<StepContent style={{ width: 300 }}>
-									<Slider
-										color="secondary"
-										step={null}
-										marks={marks[index]}
-										min={marks[index][0]["value"]}
-										max={marks[index][6]["value"]}
-										ThumbComponent="div"
-										valueLabelDisplay="on"
-									/>
+									<form onSubmit={handleSubmit(handleChange)}>
+										<Controller
+											name="slider"
+											control={control}
+											defaultValue={marks[index][0]["value"]}
+											render={(props) => (
+												<Slider
+													{...props}
+													onChange={(_, value) => {
+														props.onChange(value);
+													}}
+													color="secondary"
+													step={null}
+													marks={marks[index]}
+													min={marks[index][0]["value"]}
+													max={marks[index][6]["value"]}
+													valueLabelDisplay="on"
+													className={classes.slider}
+												/>
+											)}
+										/>
+										<div className="button-container"></div>
+										<Button
+											size="small"
+											variant="contained"
+											color="primary"
+											// className={}
+											onClick={
+												activeStep === steps.length - 1 ? completed : nextStep
+											}
+										>
+											{activeStep === steps.length - 1 ? "Finish" : "Next"}
+										</Button>
+										<Button
+											size="small"
+											variant="outlined"
+											color="secondary"
+											onClick={
+												activeStep === steps.length - 1
+													? resetStepper
+													: prevStep
+											}
+											style={
+												activeStep === 0
+													? { display: "none" }
+													: { marginLeft: "5px" }
+											}
+										>
+											{activeStep === steps.length - 1 ? "Reset" : "Back"}
+										</Button>
+										<Button
+											size="small"
+											variant="contained"
+											color="primary"
+											// className={}
+											onClick={
+												activeStep === steps.length - 1 ? completed : nextStep
+											}
+										>
+											{activeStep === steps.length - 1 ? "Finish" : "Next"}
+										</Button>
+										<Button
+											size="small"
+											variant="outlined"
+											color="secondary"
+											onClick={
+												activeStep === steps.length - 1
+													? resetStepper
+													: prevStep
+											}
+											style={
+												activeStep === 0
+													? { display: "none" }
+													: { marginLeft: "5px" }
+											}
+										>
+											{activeStep === steps.length - 1 ? "Reset" : "Back"}
+										</Button>
+									</form>
 								</StepContent>
 							</Step>
 						))}
@@ -207,50 +226,41 @@ const WaterParam: FC = () => {
 						</Typography>
 					</div>
 				)}
-
-				{/* Buttons logics to manipulate the form */}
-				<div className={classes.buttonContainer}>
-					<div>
-						{activeStep === steps.length - 1 ? (
-							<Button
-								variant="contained"
-								size="small"
-								onClick={completed}
-								className={classes.nextButton}
-							>
-								Finish
-							</Button>
-						) : (
-							<Button
-								variant="contained"
-								size="small"
-								onClick={nextStep}
-								className={classes.nextButton}
-							>
-								Next
-							</Button>
-						)}
-
-						<Button
-							variant="outlined"
-							size="small"
-							style={
-								activeStep === 0
-									? { display: "none" }
-									: { borderColor: "#df3106", color: "#df3106" }
-							}
-							onClick={
-								activeStep === steps.length - 1 ? resetStepper : prevStep
-							}
-							className={classes.backButton}
-						>
-							{activeStep === steps.length - 1 ? "Reset" : "Back"}
-						</Button>
-					</div>
-				</div>
 			</ThemeProvider>
 		</div>
 	);
 };
+
+const useStyles = makeStyles((theme) =>
+	createStyles({
+		root: {
+			width: "100%",
+		},
+		avatar: {
+			height: theme.spacing(10),
+			width: theme.spacing(10),
+			marginLeft: "auto",
+			marginRight: "auto",
+			marginBottom: theme.spacing(3),
+		},
+		inputForm: {
+			marginTop: theme.spacing(3),
+		},
+		slider: {
+			marginTop: theme.spacing(5),
+		},
+	})
+);
+
+const theme = createMuiTheme({
+	palette: {
+		primary: {
+			main: "#007c89",
+		},
+		secondary: {
+			main: "#df3016",
+		},
+	},
+});
 
 export default WaterParam;
